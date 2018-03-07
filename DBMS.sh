@@ -204,7 +204,7 @@ case $choice in
 	1) selectDB ;;
 	2) selectAll ;;
 	3) selectColumn;;
-	4)  ;;
+	4) selectByCond;;
 	5) FirstMenu ;;
 	6) exit ;;
 	*) echo "wrong choice" ; FirstMenu
@@ -219,7 +219,6 @@ selectMenOptions;
 
 function FirstMenu()
 {
-
 
   echo -e "\n---------Main Menu-------------"
   echo "| 1. write a query              |"
@@ -291,11 +290,67 @@ read tName
     else
     	echo "this table does not exits"
     fi
+}
+####################################################################################
+function selectByCond()
+{
+checkSelectedDB selectMenOptions ; #check if user select data base or not 
+echo -e "Enter Table Name: \c"
+read tName
+   if [[ -f ./$tName  ]] ; then 
+
+   			echo -e "Enter column Name that you want to  filter by it: \c"
+   		read column
+ 		columnnum=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$column'") print i}}}' $tName)
+ 			if [[ $columnnum == "" ]]
+ 			then
+ 				echo "this column not found"
+ 			selectMenOptions
+ 			else
+ 		 		echo -e "\n choose operator from [== ,<, >, <=, >= ,!=] \c"
+ 		 		read opt
+ 		 		if [[ $opt == "==" ]]  || [[ $opt == "<" ]] || [[ $opt == ">" ]] || [[ $opt == ">=" ]] || [[ $opt == "<=" ]]||[[ $opt == "!=" ]]
+ 		 		then
+ 		 			 echo -e "\nEnter value of column that you want to filter by it: \c"
+      				read val
+      				results=$(awk 'BEGIN{FS=":"}{if ($'$columnnum$opt$val') print $0}' $tName 2>>./.error.log |  column -t -s ':')
+      				if [[ $results == "" ]] ;then 
+      					echo "No  value  like this"
+      					selectMenOptions
+      				else
+      					awk 'BEGIN{FS=":"}{if(NR == 1){print $0}if(NR > 1){if ($'$columnnum$opt$val') print $0}}' $tName 2>>./error.log |  column -t -s ':' >>selectByCond.csv
+      					awk 'BEGIN{FS=":"}{if(NR == 1){print "----------------";print $0;print "----------------"}if(NR > 1){if ($'$columnnum$opt$val') print $0}}' $tName 2>>./error.log |  column -t -s ':' 
+
+      				fi	
+      						
+ 		 		else
+ 		 			echo "wrong operator"
+ 		 			fi
+ 		 		fi			
+
+
+
+  	else
+   	echo "this table does not exits"
+  fi
+
 
 
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+#################################################################################
 FirstMenu
 
 
