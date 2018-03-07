@@ -178,6 +178,7 @@ function checkSelectedDB()
 	if [ -z $DB_used ];
 	then 
 	echo "No Data base Selected Please Select Database"
+	$1
 
 	fi 
 
@@ -193,7 +194,8 @@ function selectMenOptions()
   echo "| 2. select All            		"
   echo "| 3. Select Specific Column     "
   echo "| 4. Select From Table with condition(where)"
-  echo "| 5. exit                		"
+ echo "| 5. back to Main menu"
+ echo "| 6. exit                		"
 
 echo  "Enter Choice:";
 read  choice;
@@ -202,14 +204,15 @@ case $choice in
 	1) selectDB ;;
 	2) selectAll ;;
 	3) selectColumn;;
-	4) ;;
-	5) exit ;;
-	*) echo "wrong choice" FirstMenu
+	4)  ;;
+	5) FirstMenu ;;
+	6) exit ;;
+	*) echo "wrong choice" ; FirstMenu
 	
 esac
 
 
-FirstMenu;
+selectMenOptions;
 }
 
 #######################################################################
@@ -260,10 +263,41 @@ selectMenOptions
 }
 
 
+
+
 ###############################################################################
+function selectColumn()
+{
+checkSelectedDB selectMenOptions ; #check if user select data base or not 
+echo -e "Enter Table Name: \c"
+read tName
+   if [[ -f ./$tName  ]] ; then 
+   echo -e "Enter column Name that you want to select: \c"
+   read column
+ columnnum=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$column'") print i}}}' $tName)
+ 		if [[ $columnnum == "" ]]
+ 		then
+ 			echo "this column not found"
+ 			selectMenOptions
+ 		else
+ 			echo columnnum 
+ 			  awk 'BEGIN{FS=":"}{if(NR ==1){print "-------------";print $'$columnnum';print "-------------"};if(NR >1){print $'$columnnum'}}' $tName
+ 			 awk 'BEGIN{FS=":"}{print $'$columnnum'}' $tName >> selectColumn.csv
+
+
+ 		fi	  
+       
+
+    else
+    	echo "this table does not exits"
+    fi
+
+
+
+}
 
 FirstMenu
 
 
 
-
+###############################################################################
