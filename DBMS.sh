@@ -1,7 +1,12 @@
 #!/bin/bash
-
 USEDB_FLAG=0
 DB_NAME=""
+DB_used=""
+
+
+<<COMMENT1
+
+
 
 function showDBs(){
   if [[ "${arr[0]}" = "show" && "${arr[1]}" = "databases" ]]; then
@@ -150,3 +155,115 @@ echo "For more help & elaborated explanation on how to use it, please go to READ
 while true; do
   initialize
 done
+COMMENT1
+
+#######################################
+function selectDB() {
+  echo -e "Enter Database Name: "
+  read dbName
+  cd $HOME/Desktop/$dbName 2>>errorshappend.log
+  if [[ $? == 0 ]]; then
+    echo "Database $dbName was Successfully Selected"
+     DB_used=$dbName 
+    selectMenOptions
+  else
+    echo "Database $dbName wasn't found"
+  selectMenOptions
+  fi
+}
+
+function checkSelectedDB()
+{
+
+	if [ -z $DB_used ];
+	then 
+	echo "No Data base Selected Please Select Database"
+
+	fi 
+
+}
+
+########################################
+
+function selectMenOptions()
+{
+
+  echo -e "\n---------select options Menu-------------"
+  echo "| 1. use or change Database     "
+  echo "| 2. select All            		"
+  echo "| 3. Select Specific Column     "
+  echo "| 4. Select From Table with condition(where)"
+  echo "| 5. exit                		"
+
+echo  "Enter Choice:";
+read  choice;
+
+case $choice in
+	1) selectDB ;;
+	2) selectAll ;;
+	3) selectColumn;;
+	4) ;;
+	5) exit ;;
+	*) echo "wrong choice" FirstMenu
+	
+esac
+
+
+FirstMenu;
+}
+
+#######################################################################
+
+function FirstMenu()
+{
+
+
+  echo -e "\n---------Main Menu-------------"
+  echo "| 1. write a query              |"
+  echo "| 2. Select From  Table         |"
+  echo "| 3. sort Table                 |"
+  echo "| 4. drop Table                 |"
+  echo "| 5. exit                		|"
+
+echo  "Enter Choice:";
+read  choice;
+
+case $choice in
+	1) echo "hii";;
+	2) selectMenOptions;;
+	3) echo "sort table";;
+	4) echo "drop table";;
+	5) exit ;;
+	*) echo "wrong choice" FirstMenu
+	
+esac
+
+
+
+
+}
+#################################################################################
+function selectAll()
+{
+
+checkSelectedDB selectMenOptions ; #check if user select data base or not 
+  echo -e "Enter Table Name: \c"
+  read tName
+    if [[ -f ./$tName  ]] ; then 
+
+     column -t -s ':' $tName | tee selectAll.csv  
+
+    else
+    	echo "this table does not exits"
+    fi
+selectMenOptions
+}
+
+
+###############################################################################
+
+FirstMenu
+
+
+
+
