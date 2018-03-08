@@ -193,9 +193,10 @@ function selectMenOptions()
   echo "| 1. use or change Database     "
   echo "| 2. select All            		"
   echo "| 3. Select Specific Column     "
-  echo "| 4. Select From Table with condition(where)"
- echo "| 5. back to Main menu"
- echo "| 6. exit                		"
+  echo "| 4. Select All From Table with condition(where)"
+  echo "| 5. Select specific Column From Table with condition(where)"
+ echo "| 6. back to Main menu"
+ echo "| 7. exit             "
 
 echo  "Enter Choice:";
 read  choice;
@@ -205,9 +206,10 @@ case $choice in
 	2) selectAll ;;
 	3) selectColumn;;
 	4) selectByCond;;
-	5) FirstMenu ;;
-	6) exit ;;
-	*) echo "wrong choice" ; FirstMenu
+	5) selectColByCond;;
+	6) FirstMenu ;;
+	7) exit ;;
+	*) echo "wrong choice"  FirstMenu
 	
 esac
 
@@ -338,6 +340,53 @@ read tName
 
 
 }
+#################################################################################
+function selectColByCond()
+{
+
+
+checkSelectedDB selectMenOptions ; #check if user select data base or not 
+echo -e "Enter Table Name: \c"
+read tName
+   if [[ -f ./$tName  ]] ; then 
+   		echo -e "Enter column Name that you want to select: \c" 
+   		read columnselect
+   		columnselect=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$columnselect'") print i}}}' $tName)
+
+   		echo -e "Enter column Name that you want to  filter by it: \c"
+   		read column
+ 		columnnum=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$column'") print i}}}' $tName)
+ 			if [[ $columnnum == "" ]] || [[ $columnselect == "" ]]
+ 			then
+ 				echo "column not found"
+ 			selectMenOptions
+ 			else
+ 		 		echo -e "\n choose operator from [== ,<, >, <=, >= ,!=] \c"
+ 		 		read opt
+ 		 		if [[ $opt == "==" ]]  || [[ $opt == "<" ]] || [[ $opt == ">" ]] || [[ $opt == ">=" ]] || [[ $opt == "<=" ]]||[[ $opt == "!=" ]]
+ 		 		then
+ 		 			echo -e "\nEnter value of column that you want to filter by it: \c"
+      				read val
+      				results=$(awk 'BEGIN{FS=":"}{if ($'$columnnum$opt$val') print $'$columnselect'}' $tName 2>>./.error.log |  column -t -s ':')
+      				if [[ $results == "" ]] ;then 
+      					echo "No  value  like this"
+      					selectMenOptions
+      				else
+      					awk 'BEGIN{FS=":"}{if(NR == 1){print $'$columnselect'}if(NR > 1){if ($'$columnnum$opt$val') print $'$columnselect'}}' $tName 2>>./error.log |  column -t -s ':' >>selectColByCond.csv
+      					awk 'BEGIN{FS=":"}{if(NR == 1){print "----------------";print $'$columnselect';print "----------------"}if(NR > 1){if ($'$columnnum$opt$val') print $'$columnselect'}}' $tName 2>>./error.log |  column -t -s ':' 
+
+      				fi	
+      						
+ 		 		else
+ 		 			echo "wrong operator"
+ 		 			fi
+ 		 		fi			
+
+
+
+  	else
+   	echo "this table does not exits"
+  fi
 
 
 
@@ -345,9 +394,7 @@ read tName
 
 
 
-
-
-
+}
 
 
 #################################################################################
