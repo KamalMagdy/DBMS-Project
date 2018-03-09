@@ -236,7 +236,7 @@ read  choice;
 case $choice in
 	1) selectDB SortMenunOptions ;;
 	2) sortTableAsc;;
-	3) echo "hi";;
+	3) sortTableDsc;;
 	4) FirstMenu ;;
 	5) exit ;;
 	*) echo "wrong choice"  FirstMenu
@@ -473,6 +473,92 @@ checkSelectedDB SortMenunOptions ; #check if user select data base or not
 
 
 }
+
+
+
+
+
+
+
+#################################################################################
+
+function sortTableDsc()
+{
+
+checkSelectedDB SortMenunOptions ; #check if user select data base or not 
+
+  echo -e "Enter Table Name: \c"
+  read tName
+    if [[ -f ./$tName  ]] ; then 
+
+       echo -e "Enter Column name that you want to sort by it: \c"
+  		read columnsort
+  		columnsort=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$columnsort'") print i}}}' $tName)
+  		if [[ $columnsort == "" ]]
+ 		then
+ 			echo "this column not found"
+ 			SortMenunOptions
+ 			
+ 		else
+ 			
+ 			(head -n 1 $tName |column -t -s ':' && tail -n +2 $tName | sort -r -t ':' -k$columnsort | column -t -s ':' )
+ 			 echo "| 1. Save this changes to the source Table"
+ 			 echo "| 2. Exit"
+
+			echo  "Enter Choice:";
+			read  choice;
+			case $choice in
+			1) (head -n1  $tName && tail -n +2  $tName | sort -r -t ':' -k$columnsort -o Tempory)
+			firstline=$(awk 'BEGIN{FS=":"}{if(NR==1){print $0}}' $tName)
+			echo $firstline > $tName
+			cat Tempory >> $tName
+			clear
+			rm -f Tempory
+			echo "Your table has been changed Successfully"
+				;;
+
+			2) exit ;;
+			esac
+
+ 		fi	
+
+
+
+    else
+    	echo "this table does not exits"
+    fi
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
