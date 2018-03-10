@@ -2,7 +2,6 @@
 
 USEDB_FLAG=0
 DB_NAME=""
-# pkFlag=0
 
 function showDBs(){
   if [[ "${arr[0]}" = "show" && "${arr[1]}" = "databases" ]]; then
@@ -33,16 +32,21 @@ function createDBsTb(){
         touch ./$DB_NAME/$tableName.cons  #constrains
         read -p "How many fields to create: " nf
         x=1
+        pkFlag=0
         while [ $x -le $nf ]; do
           read -p "Field $x's Name: " fld
-          # if [[ $pkFlag == 0 ]]; then
+          elseFlag=0                        #other constrains flag to check
+          if [[ $pkFlag == 0 ]]; then
             read -p "Is it the Primary Key? (y/n) " pk
-            # pkFlag=1
             if [[ $pk == "y" ]]; then      #unique, means not NULL and has no default value
               unique="y"
               notNull="y"
               hasDef="n"
-            else
+              pkFlag=1
+              elseFlag=1
+            fi
+          fi
+            if [[ $elseFlag != 1 ]]; then      #unique, means not NULL and has no default value
               read -p "Is the field Unique? (y/n) " unique
               if [ $unique = "y" ]; then  #not NULL and has no default value
                 notNull="y";
@@ -95,7 +99,111 @@ function useDB(){
 
 #######################################
 function alterTable(){
-    echo "alter"
+  if (( USEDB_FLAG != 0 )); then
+    if [[ "${arr[0]}" == "alter" && "${arr[1]}" == "table" ]]
+    then
+        tableName="./$DB_NAME/${arr[2]}.table"
+        consName="./$DB_NAME/${arr[2]}.cons"
+        if [ -f $consName ]; then
+          if [ "${arr[3]}" = "add" ]; then
+            awk -F ":" -v column="${arr[4]}" 'BEGIN { if($1==val) { print "1"; } } ' "$consName"
+              fields=""
+              echo "Field's Name is: ${arr[4]} " ;
+              #read -r fld;
+              fld="${arr[4]}";
+              read -p "Is it the Primary Key? (y/n) " pk
+              # pkFlag=1
+              if [[ $pk == "y" ]]; then      #unique, means not NULL and has no default value
+                unique="y"
+                notNull="y"
+                hasDef="n"
+              else
+                read -p "Is the field Unique? (y/n) " unique
+                if [ $unique = "y" ]; then  #not NULL and has no default value
+                  notNull="y";
+                  hasDef="n";
+                else
+                  read -p "The filed is NOT NULL? (y/n) " notNull
+                  read -p "Is the field has Default Value (y/n)? " hasDef
+                  if [ $hasDef = "y" ]; then
+                    read -p "Enter Default value: " hasDef
+                  fi
+                fi
+              fi
+            # fi
+            if [ $hasDef = "n" ];then
+              read -p "Enter Data Type (int - char - varchar ): " dataType
+              if [ $dataType = "int" ]; then
+                dataType="int";
+              elif [ $dataType = "char" ]; then
+                dataType="char"
+              else
+                dataType="varchar";
+              fi
+            fi
+            saveCons=" ";
+            saveCons="$fld:$pk:$notNull:$unique:$hasDef:$dataType";
+
+            echo "$saveCons" >> ./$DB_NAME/${arr[2]}.cons
+            echo "Table ${arr[2]} Altered Successfully"
+
+  elif [ "${arr[3]}" = "drop" ]; then
+            var1=`awk -F':' -v str="${arr[4]}" 'BEGIN { if($1==str) { if($2=="y") print "1"; } } END { }' "$consName"`
+            if [ "$var1" != "1" ]; then
+              echo "Dropping Column ${arr[4]}"
+              if [ -f temp ]
+              then
+              rm temp
+              fi
+              awk -F':' -v str="${arr[4]}" 'BEGIN { IGNORECASE=1; } { if($1!=str) { print $0; } } END { }' "$consName" >> temp
+                cat temp > "$consName"
+
+                var=`head -n 1 $tableName`
+                IFS=":" read -a allFields <<< "$var";
+
+                index=1;
+                for i in "${allFields[@]}"
+                  do
+                    if [[ $i == "${arr[4]}" ]]; then
+                      break;
+                    else
+                      index=`expr $index + 1`
+                    fi
+                done
+                if [ -f temp ]; then
+                rm temp
+                fi
+                awk -F':' -v indVar="$index" 'BEGIN { IGNORECASE=1; }
+                  {
+                        row=""
+                        for(i=1;i<=NF;i++)
+                        {
+                          if(i!=indVar)
+                          {
+                            if(i!=NF)
+                              row=row $i":"
+                            else
+                              row=row $i
+                          }
+                        }
+                      print row
+                  }' "$tableName" > temp
+                  cat temp > "$tableName"
+            else
+              echo "Primary Key can't be dropped"
+            fi
+          else
+            echo "Alter Syntax Error"
+          fi
+        else
+          echo "Table ${arr[2]} doesn't exist"
+        fi
+    else
+      echo "Syntax Error"
+  fi
+else
+    echo "Use database first"
+fi
 }
 
 #######################################
@@ -136,6 +244,7 @@ function uniqueRec(){
 }
 ###########insertRecord###########
 function insertRecord(){
+  if (( USEDB_FLAG != 0 )); then
     if [[ ${arr[0]} = "insert" && ${arr[1]} = "into" ]]; then
     tableName="./$DB_NAME/${arr[2]}.table"
     consName="./$DB_NAME/${arr[2]}.cons"
@@ -182,7 +291,7 @@ function insertRecord(){
         if [[ ${consR[5]} != "n"  && $consFlag != "n" ]]; then  #Default value
           if [[ ${value[$x]} == "" ]]; then
             echo "${consR[5]}"
-            ${value[$x]}=${consR[5]}
+            value[$x]=${consR[5]}
             echo "Default value inserted"
           fi
         fi
@@ -231,6 +340,9 @@ function insertRecord(){
       echo "Table doesn't exist!"
     fi
   fi
+else
+  echo "Use database first"
+fi
 }
 
 #######################################
