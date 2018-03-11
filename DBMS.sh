@@ -209,7 +209,7 @@ case $choice in
 	5) selectColByCond;;
 	6) FirstMenu ;;
 	7) exit ;;
-	*) echo "wrong choice"  FirstMenu
+	*) FirstMenu
 	
 esac
 
@@ -239,7 +239,7 @@ case $choice in
 	3) sortTableDsc;;
 	4) FirstMenu ;;
 	5) exit ;;
-	*) echo "wrong choice"  FirstMenu
+	*) FirstMenu
 	
 esac
 
@@ -259,7 +259,7 @@ function FirstMenu()
   echo "| 3. Select From  Table         |"
   echo "| 4. sort Table                 |"
   echo "| 5. drop Table                 |"
-  echo "| 6. exit                		|"
+  echo "| 6. exit                		    |"
 
 echo  "Enter Choice:";
 read  choice;
@@ -271,7 +271,7 @@ case $choice in
 	4) SortMenunOptions;;
 	5) dropTB;;
 	6) exit ;;
-	*) echo "wrong choice" FirstMenu
+	*) FirstMenu
 	
 esac
 
@@ -287,8 +287,33 @@ checkSelectedDB selectMenOptions ; #check if user select data base or not
   echo -e "Enter Table Name: \c"
   read tName
     if [[ -f ./"$tName.table"  ]] ; then 
+      column -t  -s ':' "$tName.table"
+       echo -e "Enter name of file that you want save it"    
+      read NameResult
+      echo -e "1-save into csv file"
+      echo -e "2-save into HTML page"
+      echo -e "Enter choice"
+      read choice
+      case $choice in
+        1) awk '{print $0}' "$tName.table" > "$NameResult.csv" ;;
+        2)
 
-     column -t -s ':' "$tName.table" | tee selectAll.csv  
+
+
+      awk 'BEGIN{FS=":"; print "<html> <head> <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' integrity='sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u' crossorigin='anonymous'> </head> <table class='table'> "}{if (NR==1){
+        }; {for(i=1;i<=NF;i++){
+        print "<td>"$i"</td>"
+        if (NF == i)
+         {
+           print "<tr></tr>"
+
+          }
+          }}}END{print  "</table>"}'  "$tName.table" >> "$NameResult.Html"
+
+         ;;
+
+        *)   selectMenOptions ;;
+          esac
 
     else
     	echo "this table does not exits"
@@ -315,7 +340,18 @@ read tName
  			selectMenOptions
  		else 
  			  awk 'BEGIN{FS=":"}{if(NR ==1){print "-------------";print $'$columnnum';print "-------------"};if(NR >1){print $'$columnnum'}}' "$tName.table"
- 			 awk 'BEGIN{FS=":"}{print $'$columnnum'}' "$tName.table" >> selectColumn.csv
+ 			  #awk 'BEGIN{FS=":"}{print $'$columnnum'}' "$tName.table" >> selectColumn.csv
+         echo -e "Enter name of file that you want save it"    
+        read NameResult
+        echo -e "1-save into csv file"
+        echo -e "2-save into HTML page"
+        echo -e "Enter choice"
+        read choice
+        case $choice in
+        1) awk 'BEGIN{FS=":"}{print $'$columnnum'}' "$tName.table" >> "$NameResult.csv"  ;;
+        2) awk 'BEGIN{FS=":" ;print "<html> <head> <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' integrity='sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u' crossorigin='anonymous'> </head> <table class='table'>" }{ if (NR == 1){ print " <thead class="thead-dark"><tr><th>"$'$columnnum'"</th><tr></thead"};if (NR > 1){ print "<tr><td>"$'$columnnum'"</td><tr>"}}' "$tName.table" >> "$NameResult.Html" ;;
+        *) selectMenOptions ;;
+        esac
 
 
  		fi	  
@@ -352,8 +388,37 @@ read tName
       					echo "No  value  like this"
       					selectMenOptions
       				else
-      					awk 'BEGIN{FS=":"}{if(NR == 1){print $0}if(NR > 1){if ($'$columnnum$opt$val') print $0}}' "$tName.table" 2>>./error.log |  column -t -s ':' >>selectByCond.csv
-      					awk 'BEGIN{FS=":"}{if(NR == 1){print "----------------";print $0;print "----------------"}if(NR > 1){if ($'$columnnum$opt$val') print $0}}' "$tName.table" 2>>./error.log |  column -t -s ':' 
+                  awk 'BEGIN{FS=":"}{if(NR == 1){print "----------------";print $0;print "----------------"}if(NR > 1){if ($'$columnnum$opt$val') print $0}}' "$tName.table" 2>>./error.log |  column -t -s ':' 
+                  echo -e "Enter name of file that you want save it"    
+                  read NameResult
+                  echo -e "1-save into csv file"
+                  echo -e "2-save into HTML page"
+                  echo -e "Enter choice"
+                  read choice
+                  case $choice in
+                  1) awk 'BEGIN{FS=":"}{if(NR == 1){print $0}if(NR > 1){if ($'$columnnum$opt$val') print $0}}' "$tName.table" 2>>./error.log > "$NameResult.csv" ;;
+                  2) awk 'BEGIN{FS=":";print "<html> <head> <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' integrity='sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u' crossorigin='anonymous'> </head> <table class='table'> "}{if(NR == 1)
+                  { for(i=1;i<=NF;i++){
+                  print "<td>"$i"</td>"
+                 if (NF == i)
+                {
+                     print "<tr></tr>"
+
+                  }}}
+
+                   ;if(NR > 1){if ($'$columnnum$opt$val')
+                  { for(i=1;i<=NF;i++){
+                 print "<td>"$i"</td>"
+                 if (NF == i)
+                {
+                     print "<tr></tr>"
+
+                  }
+
+                }}}}' "$tName.table" 2>>./error.log >>"$NameResult.Html" ;;
+                *) selectMenOptions ;;  
+                esac
+      					
 
       				fi	
       						
@@ -404,9 +469,24 @@ read tName
       					echo "No  value  like this"
       					selectMenOptions
       				else
-      					awk 'BEGIN{FS=":"}{if(NR == 1){print $'$columnselect'}if(NR > 1){if ($'$columnnum$opt$val') print $'$columnselect'}}' "$tName.table" 2>>./error.log |  column -t -s ':' >>selectColByCond.csv
-      					awk 'BEGIN{FS=":"}{if(NR == 1){print "----------------";print $'$columnselect';print "----------------"}if(NR > 1){if ($'$columnnum$opt$val') print $'$columnselect'}}' "$tName.table" 2>>./error.log |  column -t -s ':' 
 
+                  awk 'BEGIN{FS=":"}{if(NR == 1){print "----------------";print $'$columnselect';print "----------------"}if(NR > 1){if ($'$columnnum$opt$val') print $'$columnselect'}}' "$tName.table" 2>>./error.log |  column -t -s ':' 
+
+                   echo -e "Enter name of file that you want save it"    
+                  read NameResult
+                  echo -e "1-save into csv file"
+                  echo -e "2-save into HTML page"
+                  echo -e "Enter choice"
+                  read choice
+                  case $choice in
+                    2) awk 'BEGIN{FS=":" ; print "<html> <head> <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' integrity='sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u' crossorigin='anonymous'> </head> <table class='table'>"}{if(NR == 1){print " <thead class="thead-dark"><tr><th>"$'$columnselect'"</th><tr></thead>"}if(NR > 1){if ($'$columnnum$opt$val') print "<tr> <td> "$'$columnselect'" <td> <tr>"}}' "$tName.table" 2>>./error.log >> "$NameResult.html" ;;
+
+                    1) awk 'BEGIN{FS=":"}{if(NR == 1){print $'$columnselect'}if(NR > 1){if ($'$columnnum$opt$val') print $'$columnselect'}}' "$tName.table" 2>>./error.log |  column -t -s ':' >>"$NameResult.csv" ;; 
+                    
+                    *) selectMenOptions ;;
+
+                    esac    					
+  
       				fi	
       						
  		 		else
