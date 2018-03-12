@@ -243,7 +243,60 @@ function dropDBsTb(){
 
 #######################################
 function selectRecord(){      
-   echo "select"
+   	if [ "${arr[1]}" == "*" ]; then
+    		tableName="a/${arr[3]}.table"
+	    	if [[ -f $tableName  ]]; then
+	      	awk -F ":" 'BEGIN { IGNORECASE=1; }
+	      {
+		for(i=1;i<=NF;i++)
+		printf ("%15s",$i);
+		printf("\n");
+	      }
+	      END { printf ("\n"); }' "$tableName"
+		fi
+	else 
+
+		
+		table="a/b.table"
+		tableCons="a/b.cons"
+		for line in `cat $tableCons`	# this for loop to push the colomn names of the table into array (args) 
+		do
+			item=`echo $line |cut -d\: -f1`
+			 args+=("$item")
+		done
+		for x in "${!arr[@]}"; #this for to loop the query cammands   
+		do 
+			if [[ ${arr[$x]} = "where" ]] ; then 
+					indexOfwhere=$x # get where index
+					colname=$(($x + 1)) # get colomn name after where phrase 
+					val=$(($x +3))  # get the value of colomn name after where phrase
+
+						#echo "${arr[$colname]}" "${arr[$val]}" 
+			fi
+		done
+		
+		
+
+		for (( c=1; c<$indexOfwhere; c++ ))  
+			do 
+					for i in "${!args[@]}"; do
+					   if [[ "${args[$i]}" = "${arr[$c]}" ]]; then
+						index=$(($i ))
+						#echo "${args[$index]}"
+						index1=$((index + 1)) 
+			val=`awk -F: -v value="${arr[$indexOfwhere + 3]}" -v val="$index1" '{$1=$val; if($1==value){a=system("echo "$0)}}'  $table`
+				#awk '{ print $index }' <<< "$val"
+					echo $val
+					#echo $index1
+					#a=$(($index1 + 1))
+					#cut -d' ' -f$a  <<< "$val"
+
+					    fi
+					done	
+			done
+
+	fi
+
 }
 
 #######################################
