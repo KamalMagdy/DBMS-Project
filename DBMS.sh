@@ -177,7 +177,9 @@ function checkSelectedDB()
 
 	if [ -z $DB_used ];
 	then 
+  echo "--------------------------------------------"
 	echo "No Data base Selected Please Select Database"
+  echo "--------------------------------------------"
 	$1
 
 	fi 
@@ -209,7 +211,10 @@ case $choice in
 	5) selectColByCond;;
 	6) FirstMenu ;;
 	7) exit ;;
-	*) FirstMenu
+	*) echo "---------------------"
+      echo "wrong choose"
+      echo "---------------------"
+
 	
 esac
 
@@ -239,7 +244,9 @@ case $choice in
 	3) sortTableDsc;;
 	4) FirstMenu ;;
 	5) exit ;;
-	*) FirstMenu
+	*)  echo "---------------------"
+      echo "wrong choose"
+      echo "---------------------"
 	
 esac
 
@@ -271,12 +278,14 @@ case $choice in
 	4) SortMenunOptions;;
 	5) dropTB;;
 	6) exit ;;
-	*) FirstMenu
+	*)  echo "---------------------"
+      echo "wrong choose"
+      echo "---------------------"
 	
 esac
 
 
-
+FirstMenu
 
 }
 #################################################################################
@@ -312,11 +321,15 @@ checkSelectedDB selectMenOptions ; #check if user select data base or not
 
          ;;
 
-        *)   selectMenOptions ;;
+        *)     echo "---------------------"
+               echo "wrong choose"
+               echo "---------------------" ;;
           esac
 
     else
+      echo "---------------------------"
     	echo "this table does not exits"
+      echo "---------------------------"
     fi
 selectMenOptions
 }
@@ -336,7 +349,9 @@ read tName
  columnnum=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$column'") print i}}}' $tName.table)
  		if [[ $columnnum == "" ]]
  		then
+    echo "---------------------------"
  			echo "this column not found"
+      echo "---------------------------"
  			selectMenOptions
  		else 
  			  awk 'BEGIN{FS=":"}{if(NR ==1){print "-------------";print $'$columnnum';print "-------------"};if(NR >1){print $'$columnnum'}}' "$tName.table"
@@ -358,7 +373,9 @@ read tName
        
 
     else
+      echo "---------------------------"
     	echo "this table does not exits"
+      echo "---------------------------"
     fi
 }
 ####################################################################################
@@ -369,23 +386,27 @@ echo -e "Enter Table Name: \c"
 read tName
    if [[ -f ./"$tName.table"  ]] ; then 
 
-   			echo -e "Enter column Name that you want to  filter by it: \c"
+   			echo -e "Enter column Name that you want to  filter by it (condition) : \c"
    		read column
  		columnnum=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$column'") print i}}}' $tName.table)
  			if [[ $columnnum == "" ]]
  			then
+      echo "---------------------------"
  				echo "this column not found"
+        echo "---------------------------"
  			selectMenOptions
  			else
  		 		echo -e "\n choose operator from [== ,<, >, <=, >= ,!=] \c"
  		 		read opt
  		 		if [[ $opt == "==" ]]  || [[ $opt == "<" ]] || [[ $opt == ">" ]] || [[ $opt == ">=" ]] || [[ $opt == "<=" ]]||[[ $opt == "!=" ]]
  		 		then
- 		 			 echo -e "\nEnter value of column that you want to filter by it: \c"
-      				read val
+ 		 			 echo -e "\nEnter value of column that you want to filter by it if value string but  it in between double quotes \"\" : \c"
+      				read val 
       				results=$(awk 'BEGIN{FS=":"}{if ($'$columnnum$opt$val') print $0}' $tName.table 2>>./.error.log |  column -t -s ':')
       				if [[ $results == "" ]] ;then 
+                echo "---------------------------"
       					echo "No  value  like this"
+                echo "---------------------------"
       					selectMenOptions
       				else
                   awk 'BEGIN{FS=":"}{if(NR == 1){print "----------------";print $0;print "----------------"}if(NR > 1){if ($'$columnnum$opt$val') print $0}}' "$tName.table" 2>>./error.log |  column -t -s ':' 
@@ -416,21 +437,27 @@ read tName
                   }
 
                 }}}}' "$tName.table" 2>>./error.log >>"$NameResult.Html" ;;
-                *) selectMenOptions ;;  
+                *)   echo "---------------------"
+                     echo "wrong choose"
+                     echo "---------------------" ;;  
                 esac
       					
 
       				fi	
       						
  		 		else
+          echo "---------------------------"
  		 			echo "wrong operator"
+          echo "---------------------------"
  		 			fi
  		 		fi			
 
 
 
   	else
+      echo "---------------------------"
    	echo "this table does not exits"
+    echo "---------------------------"
   fi
 
 
@@ -450,7 +477,7 @@ read tName
    		read columnselect
    		columnselect=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$columnselect'") print i}}}' $tName.table)
 
-   		echo -e "Enter column Name that you want to  filter by it: \c"
+   		echo -e "Enter column Name that you want to  filter by it (condition) : \c"
    		read column
  		columnnum=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$column'") print i}}}' $tName.table)
  			if [[ $columnnum == "" ]] || [[ $columnselect == "" ]]
@@ -462,7 +489,7 @@ read tName
  		 		read opt
  		 		if [[ $opt == "==" ]]  || [[ $opt == "<" ]] || [[ $opt == ">" ]] || [[ $opt == ">=" ]] || [[ $opt == "<=" ]]||[[ $opt == "!=" ]]
  		 		then
- 		 			echo -e "\nEnter value of column that you want to filter by it: \c"
+           echo -e "\nEnter value of column that you want to filter by it if value string but  it in between double quotes \"\" : \c"
       				read val
       				results=$(awk 'BEGIN{FS=":"}{if ($'$columnnum$opt$val') print $'$columnselect'}' $tName.table 2>>./.error.log |  column -t -s ':')
       				if [[ $results == "" ]] ;then 
@@ -483,21 +510,27 @@ read tName
 
                     1) awk 'BEGIN{FS=":"}{if(NR == 1){print $'$columnselect'}if(NR > 1){if ($'$columnnum$opt$val') print $'$columnselect'}}' "$tName.table" 2>>./error.log |  column -t -s ':' >>"$NameResult.csv" ;; 
                     
-                    *) selectMenOptions ;;
+                    *)   echo "---------------------"
+                         echo "wrong choose"
+                        echo "---------------------" ;;
 
                     esac    					
   
       				fi	
       						
  		 		else
+          echo "---------------------------"
  		 			echo "wrong operator"
+          echo "---------------------------"
  		 			fi
  		 		fi			
 
 
 
   	else
+      echo "---------------------------"
    	echo "this table does not exits"
+    echo "---------------------------"
   fi
 
 
@@ -526,7 +559,7 @@ checkSelectedDB SortMenunOptions ; #check if user select data base or not
  			
  			(head -n 1 "$tName.table" |column -t -s ':' && tail -n +2 "$tName.table" | sort -t ':' -k$columnsort | column -t -s ':' )
  			 echo "| 1. Save this changes to the source Table"
- 			 echo "| 2. Exit"
+ 			 echo "| 2. Back to menu"
 
 			echo  "Enter Choice:";
 			read  choice;
@@ -540,7 +573,7 @@ checkSelectedDB SortMenunOptions ; #check if user select data base or not
 			echo "Your table has been changed Successfully"
 				;;
 
-			2) exit ;;
+			2) SortMenunOptions ;;
 			esac
 
  		fi	
@@ -548,7 +581,9 @@ checkSelectedDB SortMenunOptions ; #check if user select data base or not
 
 
     else
+      echo "--------------------------------------------"
     	echo "this table does not exits"
+      echo "--------------------------------------------"
     fi
 
 
@@ -584,7 +619,7 @@ checkSelectedDB SortMenunOptions ; #check if user select data base or not
  			
  			(head -n 1 "$tName.table" |column -t -s ':' && tail -n +2 "$tName.table" | sort -r -t ':' -k$columnsort | column -t -s ':' )
  			 echo "| 1. Save this changes to the source Table"
- 			 echo "| 2. Exit"
+ 			 echo "| 2. Back To menu"
 
 			echo  "Enter Choice:";
 			read  choice;
@@ -595,10 +630,12 @@ checkSelectedDB SortMenunOptions ; #check if user select data base or not
 			cat Tempory >> "$tName.table"
 			clear
 			rm -f Tempory
+      echo "--------------------------------------------"
 			echo "Your table has been changed Successfully"
+      echo "--------------------------------------------"
 				;;
 
-			2) exit ;;
+			2) SortMenunOptions ;;
 			esac
 
  		fi	
@@ -606,7 +643,9 @@ checkSelectedDB SortMenunOptions ; #check if user select data base or not
 
 
     else
+      echo "--------------------------------------------"
     	echo "this table does not exits"
+      echo "--------------------------------------------"
     fi
 
 
@@ -628,14 +667,18 @@ function dropTB()
        rm -f "$tName.table"
        rm -f "$tName.cons"
        clear
+       echo "--------------------------------------------"
        echo "your Table drobbed suceessfully"
+       echo "--------------------------------------------"
 		;;
 		[Nn]) echo "No";;
     			
     	esac
 
     else
+      echo "--------------------------------------------"
     	echo "this table does not exits"	
+      echo "--------------------------------------------"
     fi	
 
 

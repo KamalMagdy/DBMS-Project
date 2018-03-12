@@ -1,0 +1,58 @@
+the structure of table that select and sort work on it like the following structure
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ID:Name:age:salary
+1:mohamed:15:2000
+2:ali:20:3000
+3:sara:25:5000
+4:mark:20:3000
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+the Name of table should end with (.table) like the following ex : students.table  or college.table
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+should choose  use or change database option from menu before you can select or sort or drop
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+use or change database option (this option search on database directory on
+
+user desktop directory and when found one it select it )
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+when user enter table or database or column Not exists . the prowgram show message and run again the same menu that he selected
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+select option . i try alittle bit to simulate Dbms so i made 
+
+1- select all
+
+2- select spescific column like (select age from students)
+
+3-select spescific column where condition like (select age from students Where ID > 1)
+
+4-select all where condition like (select * from students Where ID > 1)
+
+(the result of select can save as html or csv in the Database directory that user select )
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+drop table 
+
+drop two file .table  .cons  
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+
+
+
+
+
+
+
