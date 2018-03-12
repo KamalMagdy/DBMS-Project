@@ -1,0 +1,125 @@
+How to use Our DBMS:-
+
+* It works almost like MySQL using commands.
+* No command have [] it's just for demonstration.
+* No need for ; at the end of each command.
+* All commands must be lowercase letters.
+* Most of the commands won't work unless you run 'use database first'.
+
+
+1-Create Database:
+    - Command : create database [name of the database]
+    - Notes   : It will be created only if doesn't exist before
+ 
+2-Use Database:
+    - Command : use [name of the database]
+    - Notes   : You must run that command before doing any thing other than 'create database' and 'exit'.
+    -         : You must use database that already exist.
+
+3-Show Database:
+    - Command : show databases
+    - Notes   : To show all the databases that exist in the system.
+
+4-Drop Dtabase:
+    - Command : drop database [name of the database]
+    - Notes   : To drop specific database only if exist in the system.
+
+5- Exit
+    - Command : exit
+    - Notes   : To exit from DBMS from any where.
+
+6-Create tables:
+    - Command : create table [name of the table]
+    - Notes   : You will be asked the following questions:
+                - How many fields to create in the database ?
+                - Then you will be asked about the name of each field according to the number
+                - For each field you will be asked for the constrains as follows:
+                    - The primary key (If you make any field primary you won't be asked again)
+                        - if "y" for primary key you will only be asked for the datatype of the field
+                            (int - char - varchar)
+                        - if "n" for primary key you will be asked about uniqueness of the field
+                            (primary key must unique by default)
+                        - Then you will be asked if it can be NULL or not
+                        - Then you will be asked if it it has default value or not
+                             - if "y" you will be asked about the default value and will be put
+                               by default if the field was left empty
+                        - Then you will be asked for the type of the field
+                          (int ==> numbers only | char ==> letters only | varchar ==> any thing is accepted)
+
+7-Insert into tables:
+    - Command : insert into table [name of the table]
+    - Notes   : You will be asked for each field to fill
+              : You must follow the constrains or data won't be inserted
+
+8-Alter table :(change table name)
+    - Command : alter table [name of the table] change to [name of the new table]
+    - Notes   : Change specific table to a new one only if it doesn't exist
+
+9-Alter table :(add column to table)
+    - Command : alter table [name of the table] add [name of the new column]
+    - Notes   : add new column to a table only if the table exists
+
+10-Alter table:(drop column from table)
+    - Command : alter table [name of the table] drop [name of the existed column]
+    - Notes   : drop column from a table only if the column and the table exists
+
+11-Drop table :
+    - Command : drop [name of the table]
+    - Notes   : drop table only if the table exists
+
+12-delete record[s] :
+    - Command : delete from [name of the table] where [name of the column] (=,<,>,<=,>=) [value]
+    - Notes   : you can choose to delete row[s] form table with condition
+    - example : delete from user                where name                      =>          ahmed
+    - example2: delete from user                where age                       =           5                 
+
+13-update record[s] :
+    - Command : update [table name] set [column(s) name] = [value] where [column name] = [value]
+    - Notes   : you can update row
+    - example : update user         set name             = khaled where       id       = 1
+    - example : update user         set name     = khaled age = 20      where       id       = 7
+ 
+14-sort table :
+    - Command : sort [table name] orderby [column name]
+    - Notes   : you can sort table by default ascending 
+
+    - Command : sort [table name] orderby [column name] DESC
+    - Notes   : you can sort table descending 
+
+    - Command : sort [table name] orderby [column name] ASC
+    - Notes   : you can sort table ascending 
+
+15-display constrains :
+    - Command : desc [table name]
+    - Notes   : to show the table constrains(description)
+
+16-select record[s] :
+    - Command : select * from [table name]
+    - Notes   : select any thing from table if exist 
+
+    - Command : select from [column name[s]] where [column name] = [value]
+    - Notes   : select any thing from table if exist 
+    - example : select from id name where id = 5
+
+17-help :
+    - Command : --help
+    - Notes   : To open the documentation file
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

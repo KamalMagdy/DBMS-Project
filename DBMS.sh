@@ -47,6 +47,7 @@ function createDBsTb(){
             fi
           fi
             if [[ $elseFlag != 1 ]]; then      #unique, means not NULL and has no default value
+              pk="n";
               read -p "Is the field Unique? (y/n) " unique
               if [ $unique = "y" ]; then  #not NULL and has no default value
                 notNull="y";
@@ -99,7 +100,7 @@ function useDB(){
 
 #######################################
 function alterTable(){
-  if (( USEDB_FLAG != 0 )); then
+    if (( USEDB_FLAG != 0 )); then
     if [[ "${arr[0]}" == "alter" && "${arr[1]}" == "table" ]]
     then
         tableName="./$DB_NAME/${arr[2]}.table"
@@ -107,11 +108,15 @@ function alterTable(){
         if [ -f $consName ]; then
           if [[ "${arr[3]}" == "change" && "${arr[4]}" == "to" ]]     #chage to 
             then
-              mv $tableName ./$DB_NAME/${arr[5]}.table
-              mv $consName ./$DB_NAME/${arr[5]}.cons
-              echo "Table name changed to ${arr[5]}"
-              tableName="./$DB_NAME/${arr[5]}.table"
-              consName="./$DB_NAME/${arr[5]}.cons"
+              if [ -f "./$DB_NAME/${arr[5]}.table" ]; then
+                echo "Table already exists by that name"
+              else
+                mv $tableName ./$DB_NAME/${arr[5]}.table
+                mv $consName ./$DB_NAME/${arr[5]}.cons
+                echo "Table name changed to ${arr[5]}"
+                tableName="./$DB_NAME/${arr[5]}.table"
+                consName="./$DB_NAME/${arr[5]}.cons"
+              fi
           elif [ "${arr[3]}" = "add" ]; then                          #add
             awk -F ":" -v column="${arr[4]}" 'BEGIN { if($1==column) { print "1"; } } ' "$consName"
               fields=""
@@ -242,9 +247,9 @@ function dropDBsTb(){
 }
 
 #######################################
-function selectRecord(){      
+function selectRecord(){
    	if [ "${arr[1]}" == "*" ]; then
-    		tableName="a/${arr[3]}.table"
+    		tableName="$DB_NAME/${arr[3]}.table"
 	    	if [[ -f $tableName  ]]; then
 	      	awk -F ":" 'BEGIN { IGNORECASE=1; }
 	      {
@@ -274,8 +279,6 @@ function selectRecord(){
 						#echo "${arr[$colname]}" "${arr[$val]}" 
 			fi
 		done
-		
-		
 
 		for (( c=1; c<$indexOfwhere; c++ ))  
 			do 
@@ -296,7 +299,6 @@ function selectRecord(){
 			done
 
 	fi
-
 }
 
 #######################################
@@ -480,7 +482,7 @@ function updateRecord(){
 						done
 
 				
-					val=`awk -F: -v value="${arr[$indexOfwhere + 3]}" -v val="$indexofcol" '{$1=$val; if($1==value){a=system("echo "$0) } }' 				$tableName`
+					val=`awk -F: -v value="${arr[$indexOfwhere + 3]}" -v val="$indexofcol" '{$1=$val; if($1==value){a=system("echo "$0) } }' $tableName`
 					oldvalue=`echo $val | cut -d\  -f$indexofupdatecol`
 
 					sed "s/$oldvalue/${arr[$c + 2]}/" $tableName > tmp && mv tmp $tableName
@@ -699,6 +701,16 @@ fi
 }
 
 #######################################
+function helpFun(){
+    if [[ ${arr[0]} == "--help" ]]; then
+      less help_docs.help
+    else
+      echo "Syntax error"
+    fi
+
+}
+
+#######################################
 function initialize(){
   read -p "query >>> " query
   IFS=' ' read -a arr <<< "$query";    #IFS "internal field separator"
@@ -753,9 +765,12 @@ function initialize(){
       exit
     ;;
 
+    --help)
+      helpFun $arr
+    ;;
+
     *)
-      echo "Wrong Syntax, check your initial word it should be one of these:"
-      echo "show, create, use, alter, drop, select, insert, update, delete, sort, display, exit"
+      echo "Wrong Syntax, check your initial word or write --help:"
     ;;
   esac
 }
@@ -765,7 +780,7 @@ echo "Welcome To Our DBMS"
 echo "Simple explanation on how to use our DBMS:  "
 echo "You can write queries like using mysql DBMS ex:  "
 echo "create database 'the name of the new database without the quotes'  "
-echo "For more help & elaborated explanation on how to use it, please go to README file "
+echo "For more help & elaborated explanation on how to use it, please write --help file "
 
 while true; do
   initialize
