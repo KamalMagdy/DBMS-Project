@@ -377,22 +377,272 @@ fi
 
 #######################################
 function updateRecord(){
-    echo "update"
-}
+  if (( USEDB_FLAG != 0 )); then
+	   # update   user       set         name       =     khaled    where      id          =    1
+    #echo "${arr[0]} ${arr[1]} ${arr[2]} ${arr[3]} ${arr[4]} ${arr[5]} ${arr[6]} ${arr[7]} ${arr[8]}${arr[9]}  "
+	 
+	tableCons="$DB_NAME/${arr[1]}.cons"
+	tableName="$DB_NAME/${arr[1]}.table"
+	args=()
 
+	for line in `cat $tableCons`	# this for loop to push the colomn names of the table into array (args) 
+	do
+		item=`echo $line |cut -d\: -f1`
+		 args+=("$item")
+	done
+	#echo "${args[@]}" 
+	#get colonms names of the table
+	#echo "${arr[@]}"
+
+	for x in "${!arr[@]}"; #this for to loop the query cammands   
+	do 
+		if [[ ${arr[$x]} = "where"  ]] ; then 
+			indexOfwhere=$x # get where index
+			colname=$(($x + 1)) # get colomn name after where phrase 
+			val=$(($x +3))  # get the value of colomn name after where phrase
+
+				#echo "${arr[$colname]}" "${arr[$val]}"
+
+			for i in "${!args[@]}"; 
+			do
+				if [[ "${args[$i]}" = "${arr[$colname]}" ]]; then
+						indexofcol=$(($i + 1)) # get the order of colomn (after where) of the table
+				fi
+			done
+	
+								#loop for 
+			for (( c=3; c<$indexOfwhere; c++ ))  
+			do  
+					for i in "${!args[@]}"; do
+					   if [[ "${args[$i]}" = "${arr[$c]}" ]]; then
+						index=$(($i))
+						#echo "${args[$index]}"
+				
+
+					for i in "${!args[@]}"; 
+						do
+							if [[ "${args[$i]}" = "${args[$index]}" ]]; then
+									indexofupdatecol=$(($i + 1))
+							fi
+						done
+
+				
+					val=`awk -F: -v value="${arr[$indexOfwhere + 3]}" -v val="$indexofcol" '{$1=$val; if($1==value){a=system("echo "$0) } }' 				$tableName`
+					oldvalue=`echo $val | cut -d\  -f$indexofupdatecol`
+
+					sed "s/$oldvalue/${arr[$c + 2]}/" $tableName > tmp && mv tmp $tableName
+			
+					   fi
+					done
+					 		
+			done
+ 	  
+		fi
+			
+	done
+	else 
+  echo "Use database first"
+fi											
+}
 #######################################
 function deleteRecord(){
-    echo "delete"
+  if (( USEDB_FLAG != 0 )); then
+	  # delete    from       user        where   id          =             1 
+      #echo "${arr[0]} ${arr[1]} ${arr[2]} ${arr[3]} ${arr[4]} ${arr[5]} ${arr[6]}  ${arr[7]} ${arr[8]} ${arr[9]}"
+	tableCons="$DB_NAME/${arr[2]}.cons"
+	tableName="$DB_NAME/${arr[2]}.table"
+	args=()
+	
+	if  [[ "${arr[1]}" != "from"  ]]; then 
+			echo "syntax error"				
+	fi
+
+	if  [[ "${arr[3]}" != "where"  ]]; then 
+			echo "syntax error"
+	fi
+
+	for line in `cat $tableCons`	
+	do
+		item=`echo $line |cut -d\: -f1`
+		 args+=("$item")
+	done
+		
+	#echo ${args[@]}
+	for i in "${!args[@]}"; 
+	do
+		if [[ "${args[$i]}" = "${arr[4]}" ]]; then
+				index=$(($i + 1))
+		fi
+	done
+	#echo $index
+	delrows=()
+	 if [[ "${arr[5]}" = '=' ]] ;then
+	   	a=`awk -F: -v value="${arr[6]}" -v val="$index" -v table="$tableName" '{$1=$val ;if($1==value)
+		{a=system("echo "$0)   }   }' $tableName`
+		b=`echo $a | cut -d\  -f1`
+		sed -i "/$b/d" $tableName
+
+		#awk -F: -v var="khaled" '{print $1 var}'  $tableName
+		
+	elif [[ "${arr[5]}" = '>' ]] ;then
+		
+		a=`awk -F: -v value="${arr[6]}" -v val="$index" -v table="$tableName" '{$1=$val ;if($1>value)
+		{a=system("echo "$0)   }   }' $tableName`
+		
+		for del in $a
+		do
+			b=`echo $del | cut -d\  -f1`
+			sed -i "/$b/d" $tableName
+		done
+		
+		
+
+	elif [[ "${arr[5]}" = '<' ]] ;then
+		a=`awk -F: -v value="${arr[6]}" -v val="$index" -v table="$tableName" '{$1=$val ;if($1<value)
+		{a=system("echo "$0)   }   }' $tableName`
+
+		for del in $a
+		do
+			b=`echo $del | cut -d\  -f1`
+			sed -i "/$b/d" $tableName
+		done
+		
+		
+	
+	elif [[ "${arr[5]}" = '>=' ]] ;then
+		a=`awk -F: -v value="${arr[6]}" -v val="$index" -v table="$tableName" '{$1=$val ;if($1<=value)
+		{a=system("echo "$0)   }   }' $tableName`
+		b=`echo $a | cut -d\  -f1`
+		sed -i "/$b/d" $tableName
+		
+
+	elif [[ "${arr[5]}" = '<=' ]] ;then
+		a=`awk -F: -v value="${arr[6]}" -v val="$index" -v table="$tableName" '{$1=$val ;if($1<=value)
+		{a=system("echo "$0)   }   }' $tableName`
+		b=`echo $a | cut -d\  -f1`
+		sed -i "/$b/d" $tableName
+
+	elif [[ "${arr[5]}" = '!=' ]] ;then
+		a=`awk -F: -v value="${arr[6]}" -v val="$index" -v table="$tableName" '{$1=$val ;if($1!=value)
+		{a=system("echo "$0)   }   }' $tableName`
+		b=`echo $a | cut -d\  -f1`
+		sed -i "/$/d" $tableName
+	fi
+	   
+
+	#awk -F':' '{if ($2=='${arr[6]}') records=sed /$0/d $tableName }' $tableName
+	#echo $records > $tableName
+	#echo "succesfully deleted" 
+	#cat $tableName | while read line
+	#do
+	    #echo $line
+	#done
+	else 
+  echo "Use database first"
+fi		
 }
 
 #######################################
 function sortTable(){
-    echo "sort"
+  if (( USEDB_FLAG != 0 )); then
+	args=()
+	argscons=()
+	
+	tableName="./$DB_NAME/${arr[1]}.table"
+	tableCons="./$DB_NAME/${arr[1]}.cons"
+	
+
+
+	for line in `cat $tableCons`	
+	do
+		item=`echo $line |cut -d\: -f1`
+		cons=`echo $line |cut -d\: -f6`
+		 args+=("$item")
+		argscons+=("$cons")
+	done
+		
+	for i in "${!args[@]}"; 
+	do
+		if [[ "${args[$i]}" = "${arr[3]}" ]]; then
+				index=$(($i + 1))
+		fi
+	done
+		
+	if [[ ${argscons[$index - 1 ]} = "int" ]]; then 
+
+		if [[ ${arr[4]} = "DESC" ]]; then
+			sort  -t: -n -r -k $index  $tableName
+		elif [[ ${args[4]} = "ASC" ]]; then
+			sort  -t: -n -k $index  $tableName
+		else
+			sort  -t: -n -k $index  $tableName
+		fi
+
+	else 	
+		
+		if [[ ${arr[4]} = "ASC" ]]; then
+			sort  -t: -k $index  $tableName
+		elif [[ ${arr[4]} = "DESC" ]]; then
+			sort -t: -r -k $index  $tableName
+		else
+			sort  -t: -k $index  $tableName
+		fi
+	fi
+	else 
+  echo "Use database first"
+fi		
 }
 
 #######################################
 function displayTable(){
-    echo "display"
+  if (( USEDB_FLAG != 0 )); then
+    	tableCons="$DB_NAME/${arr[1]}.cons"
+	tableName="$DB_NAME/${arr[1]}.table"
+	for line in `cat $tableCons`	
+	do	
+		for l in $line 
+		do
+			con1=`echo $l | cut -d: -f1`
+			con2=`echo $l | cut -d: -f2`
+			con3=`echo $l | cut -d: -f3`
+			con4=`echo $l | cut -d: -f4`
+			con5=`echo $l | cut -d: -f5`
+			con6=`echo $l | cut -d: -f6`
+		
+		if [[ $con2 = "y" ]]; then
+			echo "$con1 is a primary key"
+		else
+			echo "$con1 is not a primary key"
+		fi
+
+		if [[ $con3 = "y" ]]; then
+			echo "$con1 accept NULL"
+		else
+			echo "$con1 not accept  NULL"
+		fi
+
+
+		if [[ $con4 = "y" ]]; then
+			echo "$con1 is UNIQUE"
+		else
+			echo "$con1 is not UNIQUE"
+		fi
+
+
+		if [[ $con5 != "n" ]]; then
+			echo "$con1 has Default value $con5"
+		else 
+			echo "$con1 has not Default value "
+		fi
+		
+		echo " the datatype of $con1 is $con6 "
+			
+		done
+		echo "==============================="	 
+	done
+	else 
+  echo "Use database first"
+fi		
 }
 
 #######################################
