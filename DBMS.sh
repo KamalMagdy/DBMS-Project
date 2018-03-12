@@ -31,7 +31,7 @@ function createDBsTb(){
         touch ./$DB_NAME/$tableName.table
         touch ./$DB_NAME/$tableName.cons  #constrains
         read -p "How many fields to create: " nf
-        x=1
+          x=1
         pkFlag=0
         while [ $x -le $nf ]; do
           read -p "Field $x's Name: " fld
@@ -105,8 +105,15 @@ function alterTable(){
         tableName="./$DB_NAME/${arr[2]}.table"
         consName="./$DB_NAME/${arr[2]}.cons"
         if [ -f $consName ]; then
-          if [ "${arr[3]}" = "add" ]; then
-            awk -F ":" -v column="${arr[4]}" 'BEGIN { if($1==val) { print "1"; } } ' "$consName"
+          if [[ "${arr[3]}" == "change" && "${arr[4]}" == "to" ]]     #chage to 
+            then
+              mv $tableName ./$DB_NAME/${arr[5]}.table
+              mv $consName ./$DB_NAME/${arr[5]}.cons
+              echo "Table name changed to ${arr[5]}"
+              tableName="./$DB_NAME/${arr[5]}.table"
+              consName="./$DB_NAME/${arr[5]}.cons"
+          elif [ "${arr[3]}" = "add" ]; then                          #add
+            awk -F ":" -v column="${arr[4]}" 'BEGIN { if($1==column) { print "1"; } } ' "$consName"
               fields=""
               echo "Field's Name is: ${arr[4]} " ;
               #read -r fld;
@@ -207,13 +214,36 @@ fi
 }
 
 #######################################
-function dropTable(){
-    echo "drop"
+function dropDBsTb(){
+      if [[ "${arr[0]}" == "drop" && "${arr[1]}" == "table" ]]; then
+    if (( USEDB_FLAG != 0 )); then
+        tableName="./$DB_NAME/${arr[2]}.table"
+        consName="./$DB_NAME/${arr[2]}.cons"
+      if [ -f $consName ]; then
+        rm -f "$tableName"
+        rm -f "$consName"
+        echo "Table ${arr[2]} deleted successfully"
+      else
+        echo "Table doesn't exist!"
+      fi
+    else
+      echo "Use database first"
+    fi
+  elif [[ "${arr[0]}" = "drop" && "${arr[1]}" = "database" ]]; then
+    if [ -d "${arr[2]}" ]; then
+      rm -dr "${arr[2]}"
+      echo "Database ${arr[2]} deleted successfully"
+    else
+      echo "Table doesn't exist!"
+    fi
+  else
+    echo "Syntax error!"
+  fi
 }
 
 #######################################
-function selectRecord(){
-    echo "select"
+function selectRecord(){      
+   echo "select"
 }
 
 #######################################
